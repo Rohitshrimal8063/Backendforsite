@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -85,9 +85,9 @@ app.get("/logout", auth , async(req , res) =>{
         console.log("successful logout");
 
         await req.client.save();
-        res.render("Sign_in");
+        res.render("sign_in");
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).render(error);
     }
 });
 
