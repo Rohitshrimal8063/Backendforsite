@@ -1,4 +1,4 @@
-// require('dotenv').config();
+require('dotenv').config();
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -6,7 +6,10 @@ const hbs = require("hbs");
 const bcrypt = require("bcryptjs");
 const cookieparser = require("cookie-parser");
 const auth = require("./middleware/auth")
+const passport = require('passport');
+const cookieSession = require('cookie-session')
 
+require('./passport js/passport-setup');
 require("./db/connection");
 const Rohit = require("./models/registration");
 const { json } = require("express");
@@ -17,6 +20,12 @@ const static_path = path.join(__dirname, "../public");
 const template_path = path.join(__dirname, "../templates/views");
 const partials_path = path.join(__dirname, "../templates/partials");
 
+// For an actual app you should configure this with an experation time, better keys, proxy and secure
+app.use(cookieSession({
+  name: 'tuto-session',
+  keys: ['key1', 'key2']
+}))
+
 app.use(express.json());
 app.use(cookieparser());
 app.use(express.urlencoded({extended:false}));
@@ -25,6 +34,18 @@ app.use(express.static(static_path));
 app.set("view engine", "hbs");
 app.set("views", template_path);
 hbs.registerPartials(partials_path);
+
+const isLoggedIn = (req, res, next) => {
+  if (req.user) {
+      next();
+  } else {
+      res.sendStatus(401);
+  }
+}
+
+// Initializes passport and passport sessions
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/", (req, res) => {
   res.render("index");
@@ -74,6 +95,21 @@ app.get("/registration", (req, res) => {
 //     console.log(`cookie value ${req.cookies.user}`)
 //     res.render("list");
 // });
+
+// In this route you can see that if the user is logged in u can acess his info in: req.user
+app.get('/', isLoggedIn, (req, res) =>{
+  res.render("index");
+})
+
+// Auth Routes
+app.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/google/callback', passport.authenticate('google', { failureRedirect: '/failed' }),
+function(req, res) {
+  // Successful authentication, redirect home.
+  res.redirect('/');
+}
+);
 
 app.get("/logout", auth , async(req , res) =>{
     try {
