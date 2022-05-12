@@ -22,7 +22,7 @@ passport.deserializeUser(function(user, done) {
 passport.use(new GoogleStrategy({
     clientID : "755874457447-q94mqiipdeetg5ocs0bundkrfvn05459.apps.googleusercontent.com",
     clientSecret : "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",
-    callbackURL :  "http://localhost:8000/google/callback",
+    callbackURL :  "https://foxorg-app.herokuapp.com/google/callback",
     passReqToCallback : true
   },
   function(request, accessToken, refreshToken, profile, done) {
